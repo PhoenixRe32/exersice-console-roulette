@@ -8,6 +8,10 @@ A player can only make one bet at each game. If he tries to make another bet I j
 
 No new users can be added during the game. The users that can play are the ones loaded from the file.
 
+If the file is empty, the app exits.
+
+The bonus question states that the file entry should have optional "total win" and "total bet" comma separated values which are the amounts player has won and bet in the past. No value should be treated as zero. In that case if there is only two values I will assume it's the username and total win.
+
 If the input for the bet is incorrect I just present a message and continue with the next input.
 
 I am using "pounds" and "pence" but I think it would be better to use the smallest denomination of the currency you working with and only deal with other denominations in the presentation layer.
