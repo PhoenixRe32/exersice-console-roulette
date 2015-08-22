@@ -121,6 +121,7 @@ public class GameNumberGenerator extends Game implements Runnable
 				// Outcome of bet.
 				Outcome outcome;
 				// Winnings of bet.
+				// TODO perhaps it would be better to use smallest denomination, i.e pence, cents, etc
 				BigDecimal winnings;
 
 				int betNumber = currentBet.getNumber();

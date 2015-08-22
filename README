@@ -8,6 +8,8 @@ A player can only make one bet at each game. If he tries to make another bet I j
 
 No new users can be added during the game. The users that can play are the ones loaded from the file.
 
-If the input for the bet is incorrect I just present a message and continure with the next input.
+If the input for the bet is incorrect I just present a message and continue with the next input.
+
+I am using "pounds" and "pence" but I think it would be better to use the smallest denomination of the currency you working with and only deal with other denominations in the presentation layer.
 
 When the game ends and the number is generated, while the evaluation of the players is executed (who won and what) "no bets can be made". This is an issue that was not clear to me. You ask that a bet can be made concurrently with the generation of a number and I can't understand if you mean it literally or just imply that when the number gets generated you are able to still write and submit an input. What I mean with no bets can be made, is that you can submit an input, there is no problem, but in the background I wait for the evaluation of all the bets from all the players before I record the new bet. But even logically speaking, when the results are presented and calculated, there is no point at the bet passing though, the evaluation is over and it would have to wait for the next. I just do it a bit explicitely otherwise it would be like when the dealer tells one person that he won another person is putting a bet on a number... Doens't make sense. 

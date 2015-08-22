@@ -49,10 +49,9 @@ public class GameBetMonitor extends Game implements Runnable
 		Pattern pattern = Pattern.compile(" ");
 
 		// Variables to be used in the while loop when processing the bet.
-		String userName = null;
+		String userName;
 		int rouletteNumber;
 		BigDecimal betAmount;
-		Player player;
 
 		/*
 		 * Read a line of input from the console. readLine() is blocking so it will read everything on the console until
@@ -127,50 +126,60 @@ public class GameBetMonitor extends Game implements Runnable
 			 * bets for every game. I am going to assume that if a bet was already made in the past and is made
 			 * again, the new bet will rejected. Before doing anything we will check that a game is in progress.
 			 */
-			int retries = 0;
-			while (settlingBets)
-			{
-				try
-				{
-					System.out.println("A game has just ended and the bets are being settled. Don't go anywhere. "
-							+ "In just a moment a new game will start!!!");
-					++retries;
-					if (retries > 30)
-					{
-						System.err
-								.println("There has been a technical problem. We apologise for this. "
-										+ "Do not worry, your bets will be returned to you. "
-										+ "We hope this does not discourage you to continue seeking entertainment with Gamesys.");
-						System.exit(-1);
-					}
-
-					Thread.sleep(100);
-				}
-				catch (InterruptedException e)
-				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-
-			player = players.get(userName);
-			ConcurrentHashMap<Long, Bet> betHistory = player.getBetHistory();
-			if (!betHistory.containsKey(gameId))
-			{
-				Bet bet = new Bet(rouletteNumber, betAmount);
-				betHistory.put(gameId, bet);
-				System.out.println("OK! Bet accepted.");
-				player.updateTotalBet(betAmount);
-			}
-			else
-			{
-				System.out.println("Bet rejected. A bet from this player was already made. It cannot be changed.");
-			}
-
+			waitIfSettlingBets();
 			
+			recordBet(userName, rouletteNumber, betAmount);			
 		}
 
 	}
+	
+	void recordBet(String userName, int rouletteNumber, BigDecimal betAmount)
+	{
+		Player player = players.get(userName);
+		ConcurrentHashMap<Long, Bet> betHistory = player.getBetHistory();
+		if (!betHistory.containsKey(gameId))
+		{
+			// TODO perhaps it would be better to use smallest denomination, i.e pence, cents, etc
+			Bet bet = new Bet(rouletteNumber, betAmount);
+			betHistory.put(gameId, bet);
+			System.out.println("OK! Bet accepted.");
+			player.updateTotalBet(betAmount);
+		}
+		else
+		{
+			System.out.println("Bet rejected. A bet from this player was already made. It cannot be changed.");
+		}
+	}
+	
+	void waitIfSettlingBets() 
+	{
+		int retries = 0;
+		while (settlingBets)
+		{
+			try
+			{
+				System.out.println("A game has just ended and the bets are being settled. Don't go anywhere. "
+						+ "In just a moment a new game will start!!!");
+				++retries;
+				if (retries > 30)
+				{
+					System.err
+							.println("There has been a technical problem. We apologise for this. "
+									+ "Do not worry, your bets will be returned to you. "
+									+ "We hope this does not discourage you to continue seeking entertainment with Gamesys.");
+					System.exit(-1);
+				}
+
+				Thread.sleep(100);
+			}
+			catch (InterruptedException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	/**
 	 * Validates the user. Checks that the userName is in the table as a key.
 	 * 
@@ -185,6 +194,7 @@ public class GameBetMonitor extends Game implements Runnable
 	
 	/**
 	 * Validates the bet. Checks that the number the bet was made on is in the range 1-36 inclusive.
+	 * TODO: check decimal places as well, up to 2. Anything more doesn't make sense.
 	 * 
 	 * @param rouletteNumber
 	 * @return true if the number is valid. Otherwise it returns false.
