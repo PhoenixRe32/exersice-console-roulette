@@ -10,15 +10,15 @@ import java.math.BigDecimal;
  */
 public class Bet
 {
-	// Number to bet on.
-	private String number;
+	// Number or choice to bet on.
+	private String choice;
 	
 	// Amount to bet.
 	private BigDecimal amount;
 	
-	public Bet(String number, BigDecimal amount)
+	public Bet(String choice, BigDecimal amount)
 	{
-		this.number = number;
+		this.choice = choice;
 		this.amount = amount;
 	}
 	
@@ -27,9 +27,9 @@ public class Bet
 	 * 
 	 * @return number
 	 */
-	public String getNumber()
+	public String getChoice()
 	{
-		return number;
+		return choice;
 	}
 
 	/**

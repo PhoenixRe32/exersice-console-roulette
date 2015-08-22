@@ -10,8 +10,11 @@ import java.math.BigDecimal;
  */
 public class BetResult
 {
-	// Number bet on.
-	private String number;
+	// Number or choice bet on.
+	private String choice;
+	
+	// Number that won.
+	private int winningNumber;
 		
 	// Amount won.
 	private BigDecimal winnings;
@@ -22,10 +25,11 @@ public class BetResult
 	// Outcome of the game.
 	private Outcome outcome;
 		
-	public BetResult(String number, BigDecimal winnings, String userName, Outcome outcome)
+	public BetResult(int winningNumber, String choice, BigDecimal winnings, String userName, Outcome outcome)
 	{
+		this.winningNumber= winningNumber;
 		this.userName = userName;
-		this.number = number;
+		this.choice = choice;
 		this.winnings = winnings;
 		this.outcome = outcome;
 	}
@@ -35,9 +39,9 @@ public class BetResult
 		return userName;
 	}
 
-	public String getBet()
+	public String getChoice()
 	{
-		return number;
+		return choice;
 	}
 
 	public Outcome getOutcome()
@@ -48,5 +52,13 @@ public class BetResult
 	public BigDecimal getWinnings()
 	{
 		return winnings;
+	}
+
+	/**
+	 * @return the winningNumber
+	 */
+	public int getWinningNumber()
+	{
+		return winningNumber;
 	}
 }

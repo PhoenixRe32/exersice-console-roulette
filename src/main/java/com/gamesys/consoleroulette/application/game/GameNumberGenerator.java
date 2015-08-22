@@ -1,22 +1,14 @@
 package com.gamesys.consoleroulette.application.game;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gamesys.consoleroulette.application.bet.Bet;
 import com.gamesys.consoleroulette.application.bet.BetListener;
-import com.gamesys.consoleroulette.application.bet.BetResult;
-import com.gamesys.consoleroulette.application.bet.Outcome;
-import com.gamesys.consoleroulette.application.bet.Player;
-import com.gamesys.consoleroulette.application.bet.RouletteRange;
 
 /**
  * Main class for generating numbers for games. This can be modified to be used as a base class and extend it for
@@ -37,16 +29,17 @@ public class GameNumberGenerator extends Game implements Runnable
 	// Frequency at which to spit the numbers
 	private int frequency;
 
-	// Reference to the bet monitor so we can evaluate the results and inform when we do using the settlingBets flag.
-	private GameBetMonitor betMonitor;
+	// Game id. Will only be accessed for writing from this thread. Might be accessed for reading from more than one.
+	private AtomicLong gameId;
 
-	private List<BetListener> listeners = new ArrayList<BetListener>();
+	private List<BetListener> betListeners = new ArrayList<BetListener>();
 
 	public GameNumberGenerator(int lowerBound, int upperBound, int frequency)
 	{
 		super(lowerBound, upperBound);
 		this.randomGenerator = new Random(System.currentTimeMillis());
 		this.frequency = frequency;
+		this.gameId = new AtomicLong(0);
 	}
 
 	public void run()
@@ -69,139 +62,40 @@ public class GameNumberGenerator extends Game implements Runnable
 				e.printStackTrace();
 			}
 
-			// Winning number.
+			// The game has ended. We generate the winning number.
+			log.debug("Generating the winning number of the current game");
 			winningNumber = generateNumber();
 
-			// Inform the bet monitor that we will evaluate the results of all the bets.
-			betMonitor.setSettlingBets(true);
+			// The game has ended so the next game will start. We increase the game id but first we keep a copy of
+			// the current game id to use in the evaluation of the bets of the game that just ended.
+			long currentGameId = gameId.get();
+			gameId.getAndIncrement();
 
-			// Get curent game id.
-			long gameId = betMonitor.getGameId();
-			List<BetResult> betResults = evaluateResults(winningNumber, gameId);
+			// Print results header
+			printResultsHeader(winningNumber);
 
-			// Increase the game id since this game ended and another is going to start.
-			betMonitor.setGameId(gameId + 1);
-
-			// We are done, new bets can be made for the next game.
-			betMonitor.setSettlingBets(false);
-
-			// Print results
-			printResuls(betResults, winningNumber);
-		}
-
-	}
-
-	/**
-	 * Evaluates the bets against the winning number.
-	 * 
-	 * @param winningNumber
-	 * @param gameId
-	 * @return a list of results that contain information used to present the results.
-	 */
-	private List<BetResult> evaluateResults(int winningNumber, long gameId)
-	{
-		// The results.
-		List<BetResult> betResults = new LinkedList<BetResult>();
-
-		/*
-		 * We will get all the players and iterate over them. For each player we will access all his bets and then
-		 * evaluate them against the result of this game. When evaluating them we will also prepare the presentation of
-		 * the results.
-		 */
-		ConcurrentHashMap<String, Player> players = betMonitor.getPlayers();
-		if (players.isEmpty())
-		{
-			log.info("There are no players in the game!");
-		}
-		else
-		{
-			// Loop over the users.
-			for (Map.Entry<String, Player> playerEntry : players.entrySet())
+			// Notify all players (that may be interested) that the bet is completed.
+			for (BetListener bl : betListeners)
 			{
-				// Get the bet of the player.
-				Player player = playerEntry.getValue();
-				ConcurrentHashMap<Long, Bet> betHistory = player.getBetHistory();
-				Bet currentBet = betHistory.get(gameId);
-				if (currentBet == null)
-				{
-					// This player didn't place a bet in this game, moving on.
-					continue;
-				}
-
-				// Outcome of bet.
-				Outcome outcome;
-				// Winnings of bet.
-				// TODO perhaps it would be better to use smallest denomination, i.e pence, cents, etc
-				BigDecimal winnings;
-
-				String betNumber = currentBet.getNumber();
-				if (RouletteRange.ODD.getValue().equals(betNumber))
-				{
-					if ((winningNumber % 2) == 1)
-					{
-						outcome = Outcome.WIN;
-						winnings = currentBet.getAmount().multiply(RouletteRange.ODD.getMultiplier());
-					}
-					else
-					{
-						outcome = Outcome.LOSE;
-						winnings = BigDecimal.ZERO;
-					}
-				}
-				else if (RouletteRange.EVEN.getValue().equals(betNumber))
-				{
-					if ((winningNumber % 2) == 0)
-					{
-						outcome = Outcome.WIN;
-						winnings = currentBet.getAmount().multiply(RouletteRange.EVEN.getMultiplier());
-					}
-					else
-					{
-						outcome = Outcome.LOSE;
-						winnings = BigDecimal.ZERO;
-					}
-				}
-				else
-				{
-					String winningNumberStr = Integer.toString(winningNumber);
-					if (winningNumberStr.equals(betNumber))
-					{
-						outcome = Outcome.WIN;
-						winnings = currentBet.getAmount().multiply(RouletteRange.getMultiplierByValue(betNumber));
-					}
-					else
-					{
-						outcome = Outcome.LOSE;
-						winnings = BigDecimal.ZERO;
-					}
-
-				}
-				betResults.add(new BetResult(betNumber, winnings, player.getUserName(), outcome));
-				player.updateTotalWin(winnings);
+				bl.betCompleted(currentGameId, winningNumber);
 			}
 		}
-		return betResults;
+
 	}
 
-	private void printResuls(List<BetResult> betResults, int winningNumber)
+	private void printResultsHeader(int winningNumber)
 	{
 		// Print result table title;
 		System.out.println("Number: " + winningNumber);
 		System.out.printf("%-10s %5s %9s %10s %10s %10s %n", "Player", "Bet", "Outcome", "Winnings", "TotalBet",
 				"TotalWin");
 		System.out.println("----------");
-
-		for (BetResult br : betResults)
-		{
-			System.out.printf("%-10s %5s %9s %10s %10s %10s %n", br.getUserName(), br.getBet(), br.getOutcome(),
-					br.getWinnings(), (betMonitor.getPlayers().get(br.getUserName())).getTotalBet(),
-					(betMonitor.getPlayers().get(br.getUserName())).getTotalWin());
-		}
 	}
 
-	public void addListener(BetListener toAdd)
+	// Instances to listen for when a bet is complete.
+	public void addBetListener(BetListener toAdd)
 	{
-		listeners.add(toAdd);
+		betListeners.add(toAdd);
 	}
 
 	/**
@@ -213,10 +107,13 @@ public class GameNumberGenerator extends Game implements Runnable
 	{
 		return randomGenerator.nextInt(getUpperBound()) + getLowerBound();
 	}
-
-	public void setBetMonitor(GameBetMonitor betMonitor)
+	
+	/**
+	 * Return the current game id (as a long). Will be used from the bet monitor to read the game id variable.
+	 * 
+	 */
+	public long getCurrentGameId()
 	{
-		this.betMonitor = betMonitor;
+		return gameId.get();
 	}
-
 }
