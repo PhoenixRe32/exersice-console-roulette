@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Main class for generating numbers for games. This can be modified to be used as a base class and extend it for
  * different kind of games that might need different number types (double, float, etc) or different amount of
@@ -17,6 +20,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class GameNumberGenerator extends Game implements Runnable
 {
+	// logger, because system.out and system.err... meh
+	private static final Logger log = LoggerFactory.getLogger(GameNumberGenerator.class);
+	
 	// Even value
 	private static final int EVEN = 38;
 
@@ -101,7 +107,7 @@ public class GameNumberGenerator extends Game implements Runnable
 		ConcurrentHashMap<String, Player> players = betMonitor.getPlayers();
 		if (players.isEmpty())
 		{
-			System.out.println("There are no players in the room!");
+			log.info("There are no players in the game!");
 		}
 		else
 		{

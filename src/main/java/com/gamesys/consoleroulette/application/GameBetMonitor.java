@@ -7,6 +7,9 @@ import java.math.BigDecimal;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Class that monitors all the betting. Has a thread that accepts lines of input for every bet. Processes that line
  * and updates accordingly the bet history of every player.
@@ -16,6 +19,9 @@ import java.util.regex.Pattern;
  */
 public class GameBetMonitor extends Game implements Runnable
 {
+	// logger, because system.out and system.err... meh
+	private static final Logger log = LoggerFactory.getLogger(GameBetMonitor.class);
+		
 	// A map of all the player participating in the game.
 	private ConcurrentHashMap<String, Player> players;
 
@@ -75,7 +81,7 @@ public class GameBetMonitor extends Game implements Runnable
 				 */
 				if (betDetails.length < tokens)
 				{
-					System.out.println("The input was malformed. The format expected is 'Username Number Bet'.");
+					log.info("The input was malformed. The format expected is 'Username Number Bet'.");
 					continue; // no point continuing, read the next input.
 				}
 
@@ -88,34 +94,34 @@ public class GameBetMonitor extends Game implements Runnable
 				userName = betDetails[0];
 				if (!nameIsValid(userName))
 				{
-					System.out.println("The userName does not exist in record. Please check your spelling.");
+					log.info("The userName does not exist in record. Please check your spelling.");
 					continue; // no point continuing, read the next input.
 				}
 				
 				rouletteNumber = Integer.valueOf(betDetails[1]);
 				if (!betIsValid(rouletteNumber))
 				{
-					System.out.println("The roulette number must be a number in the range 1-36 inclusive.");
+					log.info("The roulette number must be a number in the range 1-36 inclusive.");
 					continue; // no point continuing, read the next input.
 				}
 
 				betAmount = new BigDecimal(betDetails[2]);
 				if (!betAmountIsValid(betAmount))
 				{
-					System.out.println("The bet amount must be a positive number with at most 2 decimal places.");
+					log.info("The bet amount must be a positive number with at most 2 decimal places.");
 					continue; // no point continuing, read the next input.
 				}
 			}
 			catch (IOException e)
 			{
-				System.err.println("There was a problem with reading the input.");
-				e.printStackTrace();
+				log.error(e.getMessage());
+				log.warn("There was a problem with reading the input.");
 				continue; // no point continuing, read the next input.
 			}
 			catch (NumberFormatException nfe)
 			{
-				System.err.println(nfe.getMessage());
-				System.err.println("The roulette number must be a natural number (i.e. 2, 23) and "
+				log.error(nfe.getMessage());
+				log.warn("The roulette number must be a natural number (i.e. 2, 23) and "
 						+ "the bet amount must be a real number (i.e. 0.15, 3.50)");
 				continue; // no point continuing, read the next input.
 			}
