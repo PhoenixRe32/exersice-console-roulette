@@ -21,7 +21,10 @@ public class GameBetMonitor extends Game implements Runnable
 {
 	// logger, because system.out and system.err... meh
 	private static final Logger log = LoggerFactory.getLogger(GameBetMonitor.class);
-		
+	
+	// Number of tokens an input line should be divided into.
+	private final int NUM_TOKENS = 3;
+	
 	// A map of all the player participating in the game.
 	private ConcurrentHashMap<String, Player> players;
 
@@ -47,16 +50,14 @@ public class GameBetMonitor extends Game implements Runnable
 		// String to read the input from the console.
 		String line = null;
 		// Array of strings to store the split input line. For our example the correct input should be 3 tokens
-		// separated by
-		// a space in the format "Username Number_to_bet_on Bet_Amount".
-		int tokens = 3;
+		// separated by a space in the format "Username Number_to_bet_on Bet_Amount".
 		String[] betDetails;
 		// The regular expression to use to split every line of input. Might save a bit time on the long run.
 		Pattern pattern = Pattern.compile(" ");
 
 		// Variables to be used in the while loop when processing the bet.
 		String userName;
-		int rouletteNumber;
+		String rouletteChoice;
 		BigDecimal betAmount;
 
 		/*
@@ -73,15 +74,15 @@ public class GameBetMonitor extends Game implements Runnable
 				 * beforehand how many tokens we expect so we limit the split to so many tokens.
 				 */
 				line = consoleReader.readLine();
-				betDetails = pattern.split(line, tokens);
+				betDetails = pattern.split(line, NUM_TOKENS + 1);
 
 				/*
-				 * While we limit the number of tokens to the expected number we also check if the tokens are less and
-				 * print an error message to the user so he can correct his input.
+				 * While we limit the number of tokens to the expected number we also check if the number of tokens is
+				 * different than expected and print an error message to the user so he can correct his input.
 				 */
-				if (betDetails.length < tokens)
+				if (betDetails.length != NUM_TOKENS)
 				{
-					log.info("The input was malformed. The format expected is 'Username Number Bet'.");
+					log.warn("'" +line + "' was malformed. The format is 'Username Number Bet'.");
 					continue; // no point continuing, read the next input.
 				}
 
@@ -98,10 +99,10 @@ public class GameBetMonitor extends Game implements Runnable
 					continue; // no point continuing, read the next input.
 				}
 				
-				rouletteNumber = Integer.valueOf(betDetails[1]);
-				if (!betIsValid(rouletteNumber))
+				rouletteChoice = betDetails[1].toUpperCase();
+				if (!betIsValid(rouletteChoice))
 				{
-					log.info("The roulette number must be a number in the range 1-36 inclusive.");
+					log.info("The roulette number must be a number in the range 1-36 inclusive, ODD or EVEN.");
 					continue; // no point continuing, read the next input.
 				}
 
@@ -134,19 +135,19 @@ public class GameBetMonitor extends Game implements Runnable
 			 */
 			waitIfSettlingBets();
 			
-			recordBet(userName, rouletteNumber, betAmount);			
+			recordBet(userName, rouletteChoice, betAmount);			
 		}
 
 	}
 	
-	void recordBet(String userName, int rouletteNumber, BigDecimal betAmount)
+	void recordBet(String userName, String rouletteChoice, BigDecimal betAmount)
 	{
 		Player player = players.get(userName);
 		ConcurrentHashMap<Long, Bet> betHistory = player.getBetHistory();
 		if (!betHistory.containsKey(gameId))
 		{
 			// TODO perhaps it would be better to use smallest denomination, i.e pence, cents, etc
-			Bet bet = new Bet(rouletteNumber, betAmount);
+			Bet bet = new Bet(rouletteChoice, betAmount);
 			betHistory.put(gameId, bet);
 			System.out.println("OK! Bet accepted.");
 			player.updateTotalBet(betAmount);
@@ -199,19 +200,20 @@ public class GameBetMonitor extends Game implements Runnable
 	
 	
 	/**
-	 * Validates the bet. Checks that the number the bet was made on is in the range 1-36 inclusive.
-	 * TODO: check decimal places as well, up to 2. Anything more doesn't make sense.
+	 * Validates the bet. Checks that the number the bet was made on is in the map of RouletteRange. It does that
+	 * by checking if a key with the value of the argument is present in the map.
 	 * 
-	 * @param rouletteNumber
-	 * @return true if the number is valid. Otherwise it returns false.
+	 * @param rouletteChoice
+	 * @return the multiplier for the choice. Otherwise it returns false.
 	 */
-	private boolean betIsValid(int rouletteNumber)
+	private boolean betIsValid(String rouletteChoice)
 	{
-		return (rouletteNumber >= 1 && rouletteNumber <= 36);
+		return RouletteRange.valueExists(rouletteChoice);
 	}
 
 	/**
 	 * Validates the bet amount. Checks that the amount is a positive number and below the maximum bet.
+	 * TODO: check decimal places as well, up to 2. Anything more doesn't make sense.
 	 * 
 	 * @param betAmount
 	 * @return true if the amount is valid. Otherwise it returns false.

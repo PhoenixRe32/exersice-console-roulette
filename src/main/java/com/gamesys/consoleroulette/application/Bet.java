@@ -11,12 +11,12 @@ import java.math.BigDecimal;
 public class Bet
 {
 	// Number to bet on.
-	private int number;
+	private String number;
 	
 	// Amount to bet.
 	private BigDecimal amount;
 	
-	public Bet(int number, BigDecimal amount)
+	public Bet(String number, BigDecimal amount)
 	{
 		this.number = number;
 		this.amount = amount;
@@ -25,9 +25,9 @@ public class Bet
 	/**
 	 * Return the number the player bet on.
 	 * 
-	 * @return numeber
+	 * @return number
 	 */
-	public int getNumber()
+	public String getNumber()
 	{
 		return number;
 	}
