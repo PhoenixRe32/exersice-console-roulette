@@ -11,6 +11,10 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gamesys.consoleroulette.application.bet.Player;
+import com.gamesys.consoleroulette.application.game.GameBetMonitor;
+import com.gamesys.consoleroulette.application.game.GameNumberGenerator;
+
 /**
  * Class that contains entry point. Sets up the threads, reads the file with the player details and starts the main
  * application/game.

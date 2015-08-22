@@ -1,4 +1,4 @@
-package com.gamesys.consoleroulette.application;
+package com.gamesys.consoleroulette.application.game;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,6 +9,10 @@ import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.gamesys.consoleroulette.application.bet.Bet;
+import com.gamesys.consoleroulette.application.bet.Player;
+import com.gamesys.consoleroulette.application.bet.RouletteRange;
 
 /**
  * Class that monitors all the betting. Has a thread that accepts lines of input for every bet. Processes that line

@@ -1,6 +1,7 @@
-package com.gamesys.consoleroulette.application;
+package com.gamesys.consoleroulette.application.game;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.gamesys.consoleroulette.application.bet.Bet;
+import com.gamesys.consoleroulette.application.bet.BetListener;
+import com.gamesys.consoleroulette.application.bet.BetResult;
+import com.gamesys.consoleroulette.application.bet.Outcome;
+import com.gamesys.consoleroulette.application.bet.Player;
+import com.gamesys.consoleroulette.application.bet.RouletteRange;
 
 /**
  * Main class for generating numbers for games. This can be modified to be used as a base class and extend it for
@@ -22,7 +30,7 @@ public class GameNumberGenerator extends Game implements Runnable
 {
 	// logger, because system.out and system.err... meh
 	private static final Logger log = LoggerFactory.getLogger(GameNumberGenerator.class);
-	
+
 	// Random number generator.
 	private final Random randomGenerator;
 
@@ -31,6 +39,8 @@ public class GameNumberGenerator extends Game implements Runnable
 
 	// Reference to the bet monitor so we can evaluate the results and inform when we do using the settlingBets flag.
 	private GameBetMonitor betMonitor;
+
+	private List<BetListener> listeners = new ArrayList<BetListener>();
 
 	public GameNumberGenerator(int lowerBound, int upperBound, int frequency)
 	{
@@ -164,7 +174,7 @@ public class GameNumberGenerator extends Game implements Runnable
 						outcome = Outcome.LOSE;
 						winnings = BigDecimal.ZERO;
 					}
-					
+
 				}
 				betResults.add(new BetResult(betNumber, winnings, player.getUserName(), outcome));
 				player.updateTotalWin(winnings);
@@ -177,17 +187,21 @@ public class GameNumberGenerator extends Game implements Runnable
 	{
 		// Print result table title;
 		System.out.println("Number: " + winningNumber);
-		System.out.printf("%-10s %5s %9s %10s %10s %10s %n", 
-				"Player", "Bet", "Outcome", "Winnings", "TotalBet", "TotalWin");
+		System.out.printf("%-10s %5s %9s %10s %10s %10s %n", "Player", "Bet", "Outcome", "Winnings", "TotalBet",
+				"TotalWin");
 		System.out.println("----------");
 
 		for (BetResult br : betResults)
 		{
-			System.out.printf("%-10s %5s %9s %10s %10s %10s %n",
-					br.getUserName(), br.getBet(), br.getOutcome(), br.getWinnings(),  
-					(betMonitor.getPlayers().get(br.getUserName())).getTotalBet(), 
+			System.out.printf("%-10s %5s %9s %10s %10s %10s %n", br.getUserName(), br.getBet(), br.getOutcome(),
+					br.getWinnings(), (betMonitor.getPlayers().get(br.getUserName())).getTotalBet(),
 					(betMonitor.getPlayers().get(br.getUserName())).getTotalWin());
 		}
+	}
+
+	public void addListener(BetListener toAdd)
+	{
+		listeners.add(toAdd);
 	}
 
 	/**

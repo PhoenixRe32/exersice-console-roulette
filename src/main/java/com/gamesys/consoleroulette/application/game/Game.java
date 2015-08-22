@@ -1,4 +1,4 @@
-package com.gamesys.consoleroulette.application;
+package com.gamesys.consoleroulette.application.game;
 
 import java.math.BigDecimal;
 

@@ -1,4 +1,4 @@
-package com.gamesys.consoleroulette.application;
+package com.gamesys.consoleroulette.application.bet;
 
 /**
  * Possible outcomes of a game.
