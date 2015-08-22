@@ -1,5 +1,6 @@
 package com.gamesys.consoleroulette.application;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,27 +54,27 @@ public enum RouletteRange
 
 	private final String value;
 
-	private final Integer multiplier;
+	private final BigDecimal multiplier;
 
-	private static final Map<String, Integer> map = Collections.unmodifiableMap(initializeMapping());
+	private static final Map<String, BigDecimal> map = Collections.unmodifiableMap(initializeMapping());
 
 	private RouletteRange(String value, Integer multiplier)
 	{
 		this.value = value;
-		this.multiplier = multiplier;
+		this.multiplier = new BigDecimal(multiplier);
 	}
 
-	public String getCode()
+	public String getValue()
 	{
 		return value;
 	}
 
-	public Integer getMultiplier()
+	public BigDecimal getMultiplier()
 	{
 		return multiplier;
 	}
 
-	public static Integer getMultiplierByValue(String value)
+	public static BigDecimal getMultiplierByValue(String value)
 	{
 		if (map == null)
 		{
@@ -96,9 +97,9 @@ public enum RouletteRange
 		return map.containsKey(value);
 	}
 
-	private static Map<String, Integer> initializeMapping()
+	private static Map<String, BigDecimal> initializeMapping()
 	{
-		Map<String, Integer> map = new HashMap<String, Integer>();
+		Map<String, BigDecimal> map = new HashMap<String, BigDecimal>();
 		for (RouletteRange r : RouletteRange.values())
 		{
 			map.put(r.value, r.multiplier);

@@ -10,12 +10,8 @@ import java.math.BigDecimal;
  */
 public class BetResult
 {
-	private static final String ODD = "ODD";
-
-	private static final String EVEN = "EVEN";
-
 	// Number bet on.
-	private int number;
+	private String number;
 		
 	// Amount won.
 	private BigDecimal winnings;
@@ -26,7 +22,7 @@ public class BetResult
 	// Outcome of the game.
 	private Outcome outcome;
 		
-	public BetResult(int number, BigDecimal winnings, String userName, Outcome outcome)
+	public BetResult(String number, BigDecimal winnings, String userName, Outcome outcome)
 	{
 		this.userName = userName;
 		this.number = number;
@@ -41,22 +37,7 @@ public class BetResult
 
 	public String getBet()
 	{
-		if (number < 37 && number > 0)
-		{
-			return Integer.toString(number);
-		}
-		else if (number == 37)
-		{
-			return ODD;
-		}
-		else if (number == 38)
-		{
-			return EVEN;
-		}
-		else
-		{
-			return "N/A";
-		}
+		return number;
 	}
 
 	public Outcome getOutcome()

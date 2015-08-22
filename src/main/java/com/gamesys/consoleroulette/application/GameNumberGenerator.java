@@ -23,12 +23,6 @@ public class GameNumberGenerator extends Game implements Runnable
 	// logger, because system.out and system.err... meh
 	private static final Logger log = LoggerFactory.getLogger(GameNumberGenerator.class);
 	
-	// Even value
-	private static final int EVEN = 38;
-
-	// Odd value
-	private static final int ODD = 37;
-
 	// Random number generator.
 	private final Random randomGenerator;
 
@@ -130,13 +124,13 @@ public class GameNumberGenerator extends Game implements Runnable
 				// TODO perhaps it would be better to use smallest denomination, i.e pence, cents, etc
 				BigDecimal winnings;
 
-				int betNumber = currentBet.getNumber();
-				if (betNumber == ODD)
+				String betNumber = currentBet.getNumber();
+				if (RouletteRange.ODD.getValue().equals(betNumber))
 				{
 					if ((winningNumber % 2) == 1)
 					{
 						outcome = Outcome.WIN;
-						winnings = currentBet.getAmount().multiply(new BigDecimal(2));
+						winnings = currentBet.getAmount().multiply(RouletteRange.ODD.getMultiplier());
 					}
 					else
 					{
@@ -144,12 +138,12 @@ public class GameNumberGenerator extends Game implements Runnable
 						winnings = BigDecimal.ZERO;
 					}
 				}
-				else if (betNumber == EVEN)
+				else if (RouletteRange.EVEN.getValue().equals(betNumber))
 				{
 					if ((winningNumber % 2) == 0)
 					{
 						outcome = Outcome.WIN;
-						winnings = currentBet.getAmount().multiply(new BigDecimal(2));
+						winnings = currentBet.getAmount().multiply(RouletteRange.EVEN.getMultiplier());
 					}
 					else
 					{
@@ -157,15 +151,20 @@ public class GameNumberGenerator extends Game implements Runnable
 						winnings = BigDecimal.ZERO;
 					}
 				}
-				else if (betNumber == winningNumber)
-				{
-					outcome = Outcome.WIN;
-					winnings = currentBet.getAmount().multiply(new BigDecimal(36));
-				}
 				else
 				{
-					outcome = Outcome.LOSE;
-					winnings = BigDecimal.ZERO;
+					String winningNumberStr = Integer.toString(winningNumber);
+					if (winningNumberStr.equals(betNumber))
+					{
+						outcome = Outcome.WIN;
+						winnings = currentBet.getAmount().multiply(RouletteRange.getMultiplierByValue(betNumber));
+					}
+					else
+					{
+						outcome = Outcome.LOSE;
+						winnings = BigDecimal.ZERO;
+					}
+					
 				}
 				betResults.add(new BetResult(betNumber, winnings, player.getUserName(), outcome));
 				player.updateTotalWin(winnings);
