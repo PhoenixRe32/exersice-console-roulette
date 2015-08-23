@@ -126,9 +126,9 @@ public final class ConsoleRoulette
 			}
 
 			// The user name will always be present but it might be empty.
-			if (playerDetails[0].isEmpty())
+			if (playerDetails[0].isEmpty() || playerDetails[0].contains(" "))
 			{
-				log.warn("The user name cannot be empty.");
+				log.warn("The user name cannot be empty or contain empty spaces. Did you forget a comma?");
 				continue; // no point continuing, read the next input.
 			}
 			userName = playerDetails[0];

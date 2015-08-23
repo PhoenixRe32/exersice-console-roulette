@@ -6,6 +6,8 @@ I call "game" every 30 second period that a number is produced.
 
 A player can only make one bet at each game. If he tries to make another bet I just reject it. I haven't played roulette before so it took me some time to decide what to do here. I had the impression that you can make multiple bets but when I searched the internet it still was not clear. I did see some kind of bets that deal with ranges so I am not sure if that was what I was remembering. So I decided to assume one bet per person per game. No take backs.
 
+The bet must be between 0.01 and 100 pounds. (I assume some games have an upper limit)
+
 No new users can be added during the game. The users that can play are the ones loaded from the file.
 
 If the file is empty, the app exits.

@@ -28,6 +28,8 @@ public class GameBetMonitor extends Game implements Runnable
 
 	// Number of tokens an input line should be divided into.
 	private final int NUM_TOKENS = 3;
+	
+	private final String BET_DELIMITER = " ";
 
 	// A map of all the player participating in the game.
 	private ConcurrentHashMap<String, Player> players;
@@ -49,7 +51,7 @@ public class GameBetMonitor extends Game implements Runnable
 		BufferedReader consoleReader = new BufferedReader(new InputStreamReader(System.in));
 
 		// The regular expression to use to split every line of input. Might save a bit time on the long run.
-		Pattern pattern = Pattern.compile(" ");
+		Pattern pattern = Pattern.compile(BET_DELIMITER);
 
 		/*
 		 * Read a line of input from the console. readLine() is blocking so it will read everything on the console until
@@ -85,7 +87,7 @@ public class GameBetMonitor extends Game implements Runnable
 
 	}
 
-	private Bet createBet(final BufferedReader consoleReader, final Pattern pattern, final int NUM_TOKENS)
+	public Bet createBet(final BufferedReader consoleReader, final Pattern pattern, final int NUM_TOKENS)
 			throws IOException, IllegalArgumentException
 	{
 		// String to read the input from the console.
@@ -163,19 +165,28 @@ public class GameBetMonitor extends Game implements Runnable
 	 * didn't happen (the id has already changed). However it is not as clear as I would like. And is definitely as
 	 * clear if one would assume knowledge of a player in which game he is betting on.
 	 */
-	private void recordBet(Bet bet)
+	public boolean recordBet(Bet bet)
 	{
 		Player player = players.get(bet.getUserName());
 		ConcurrentHashMap<Long, Bet> betHistory = player.getBetHistory();
 		if (!betHistory.containsKey(game.getCurrentGameId()))
 		{
-			betHistory.put(game.getCurrentGameId(), bet);
+			long gameId = game.getCurrentGameId();
+			bet.setGameId(gameId);
+			
+			betHistory.put(gameId, bet);
+			
 			System.out.println("OK! Bet accepted.");
+			
 			player.updateTotalBet(bet.getAmount());
+			
+			return true;
 		}
 		else
 		{
 			System.out.println("Bet rejected. A bet from this player was already made. It cannot be changed.");
+			
+			return false;
 		}
 	}
 

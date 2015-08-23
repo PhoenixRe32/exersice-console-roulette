@@ -30,7 +30,7 @@ public class ConsoleRouletteTest
 			"Tiki_Monkey,,1.0\nBarbara,2.0\n", "Tiki_Monkey\nBarbara,\n" };
 
 	private String invalid[] =
-	{ "Tiki_Monkey,-0.2\n", "Tiki_Monkey,money\n", "Tiki_Monkey,0.5,12.52,\n", "\n" };
+	{ "Tiki_Monkey,-0.2\n", "Tiki_Monkey -0.2\n", "Tiki_Monkey,money\n", "Tiki_Monkey,0.5,12.52,\n", "\n" };
 
 
 	@BeforeClass
@@ -71,7 +71,7 @@ public class ConsoleRouletteTest
 		{
 			in = valid[i];
 			
-			String msg = "The number of players created is not 2 for input: " + i;
+			String msg = "The number of players created is not 2 for input [" + in + "]";
 			
 			StringReader sr = new StringReader(in);
 			BufferedReader br = new BufferedReader(sr);
@@ -100,14 +100,17 @@ public class ConsoleRouletteTest
 		{
 			in = invalid[i];
 			
-			String msg = "The number of players created is not 0 for input: " + i;
+			String msg = "The number of players created is not 0 for input [" + in + "]";
 			
 			StringReader sr = new StringReader(in);
 			BufferedReader br = new BufferedReader(sr);
 			Pattern pattern = Pattern.compile(PLAYER_DELIMITER);
 			
 			Map<String, Player> players = cr.createPlayerMap(br, pattern, MAX_TOKENS);
-			
+			for (Player player : players.values())
+			{
+				System.out.println(player.toString());
+			}
 			assertEquals(msg, 0, players.size());
 			
 			for (Player player : players.values())
