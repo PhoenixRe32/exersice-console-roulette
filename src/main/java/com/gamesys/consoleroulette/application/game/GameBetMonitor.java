@@ -131,6 +131,24 @@ public class GameBetMonitor extends Game implements Runnable
 
 	}
 
+	/**
+	 * In my case, since I have one thread for the monitoring of bets (a thread where the input of bets is feasible) 
+	 * and one thread for the game itself (generating the number that won and the evaluation of the results) one can 
+	 * make a bet while the game is running. What I do is that I keep a map of all the bets of each player which is 
+	 * indexed on an integer which act as an id for each game (30s segment). This id is managed by the thread running 
+	 * the game and each 30 seconds I generate a winning number and increase the game id (since generating a number 
+	 * means the current game ended and a new one will start once the evaluation of the bets completes). The bet 
+	 * monitor thread has a reference to the game thread and can access a method to get the value if the id. (I should 
+	 * point out that the id is an AtomicLong and is only modified by the game thread and only run by the bet monitor 
+	 * thread. In an expansion it could be read by multiple threads.) So when a bet is made, the bet monitor gets the 
+	 * game id and checks if the player has made a bet already in which case he rejects it based on my assumption I 
+	 * stated above. If he hasn't then the bet monitor enters another block of code where a bet object is created and 
+	 * then inserted in the bet history map of the player. Of course it could be that by that time the game id has 
+	 * changed but since it is going to be a new game, then there isn't a problem (programmatically speaking) since the 
+	 * new game also means that the player hasn't made a bet and this is a valid action and what would happen in the 
+	 * case where a change in the id didn't happen (the id has already changed).  However it is not as clear as I would 
+	 * like. And is definetely as clear if one would assume knowledge of a player in which game he is betting on.
+	 */
 	void recordBet(String userName, String rouletteChoice, BigDecimal betAmount)
 	{
 		Player player = players.get(userName);
