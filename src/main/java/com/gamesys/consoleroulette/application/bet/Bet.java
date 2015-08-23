@@ -16,8 +16,15 @@ public class Bet
 	// Amount to bet.
 	private BigDecimal amount;
 	
-	public Bet(String choice, BigDecimal amount)
+	// Game bet was made on.
+	private long gameId;
+	
+	// User that made the bet.
+	private String userName;
+	
+	public Bet(String userName, String choice, BigDecimal amount)
 	{
+		this.userName = userName;
 		this.choice = choice;
 		this.amount = amount;
 	}
@@ -40,5 +47,29 @@ public class Bet
 	public BigDecimal getAmount()
 	{
 		return amount;
+	}
+
+	/**
+	 * @return the gameId
+	 */
+	public long getGameId()
+	{
+		return gameId;
+	}
+
+	/**
+	 * @return the userName
+	 */
+	public String getUserName()
+	{
+		return userName;
+	}
+
+	/**
+	 * @param gameId the gameId to set
+	 */
+	public void setGameId(long gameId)
+	{
+		this.gameId = gameId;
 	}
 }

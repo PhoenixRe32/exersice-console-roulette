@@ -28,6 +28,8 @@ public final class ConsoleRoulette
 	// logger, because system.out and system.err... meh
 	private static final Logger log = LoggerFactory.getLogger(ConsoleRoulette.class);
 
+	private final String PLAYER_DELIMITER = ",";
+
 	private final String PLAYER_RECORD = "player_data.txt";
 
 	private final int LOWER_BOUND = 1;
@@ -52,7 +54,8 @@ public final class ConsoleRoulette
 			BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
 			// Create the player map.
-			players = cr.createPlayerMap(bufferedReader, cr.MAX_TOKENS);
+			Pattern pattern = Pattern.compile(cr.PLAYER_DELIMITER);
+			players = cr.createPlayerMap(bufferedReader, pattern, cr.MAX_TOKENS);
 
 			bufferedReader.close();
 		}
@@ -94,7 +97,7 @@ public final class ConsoleRoulette
 		betMonitorThread.start();
 	}
 
-	public ConcurrentHashMap<String, Player> createPlayerMap(BufferedReader bufferedReader, final int MAX_TOKENS)
+	public ConcurrentHashMap<String, Player> createPlayerMap(final BufferedReader bufferedReader, final Pattern pattern, final int MAX_TOKENS)
 			throws IOException
 	{
 		ConcurrentHashMap<String, Player> players = new ConcurrentHashMap<String, Player>(2);
@@ -102,7 +105,6 @@ public final class ConsoleRoulette
 		// Reading the file and creating the players.
 		String line;
 		String[] playerDetails;
-		Pattern pattern = Pattern.compile(",");
 
 		// Variables for the details of the player
 		String userName = null;

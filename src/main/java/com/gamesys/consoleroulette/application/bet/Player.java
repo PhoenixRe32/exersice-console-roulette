@@ -172,9 +172,8 @@ public class Player implements BetListener
 		BetResult betResult = new BetResult(winningNumber, betChoice, winnings, userName, outcome);
 		betResultHistory.put(gameId, betResult);
 
-		// Update totals of player
+		// Update total win of player
 		updateTotalWin(winnings);
-		updateTotalBet(betAmount);
 
 		return betResult;
 	}
