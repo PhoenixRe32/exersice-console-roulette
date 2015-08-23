@@ -178,4 +178,11 @@ public class Player implements BetListener
 
 		return betResult;
 	}
+	
+	@Override
+	public String toString()
+	{
+		return "User Name: " + userName + "\nTotal Bet: " + totalBet + "\nTotal Win: " + totalWin;
+		
+	}
 }
