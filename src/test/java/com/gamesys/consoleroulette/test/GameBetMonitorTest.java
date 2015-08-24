@@ -1,12 +1,15 @@
 package com.gamesys.consoleroulette.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.math.BigDecimal;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
@@ -47,15 +50,11 @@ public class GameBetMonitorTest
 	@BeforeClass
 	public static void oneTimeSetUp()
 	{
-		// one-time initialization code
-		System.out.println("@BeforeClass - oneTimeSetUp");
 	}
 
 	@AfterClass
 	public static void oneTimeTearDown()
 	{
-		// one-time cleanup code
-		System.out.println("@AfterClass - oneTimeTearDown");
 	}
 
 	@Before
@@ -75,7 +74,6 @@ public class GameBetMonitorTest
 	@After
 	public void tearDown()
 	{
-		System.out.println("@After - tearDown");
 	}
 
 	@Test
@@ -128,5 +126,24 @@ public class GameBetMonitorTest
 		catch (IllegalArgumentException iae)
 		{
 		}
+	}
+
+	@Test
+	public void testBetRecording()
+	{
+		System.out.println("@Test: Bet recording");
+		
+		Bet bet = new Bet("Barbara", "6", new BigDecimal(2));
+		
+		EasyMock.expect(gng.getCurrentGameId()).andStubReturn(10l);
+		EasyMock.replay(gng);
+		
+		String msg = "The total bet is not as expected for [" + bet.toString() + "]";
+		
+		gbm.recordBet(bet);
+		
+		assertEquals(msg, bet.getAmount(), players.get(bet.getUserName()).getTotalBet());
+		
+		assertTrue(players.get(bet.getUserName()).getBetHistory().containsKey(new Long(10)));
 	}
 }

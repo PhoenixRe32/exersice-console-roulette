@@ -36,28 +36,23 @@ public class ConsoleRouletteTest
 	@BeforeClass
 	public static void oneTimeSetUp()
 	{
-		// one-time initialization code
-		System.out.println("@BeforeClass - oneTimeSetUp");
 	}
 
 	@AfterClass
 	public static void oneTimeTearDown()
 	{
-		// one-time cleanup code
-		System.out.println("@AfterClass - oneTimeTearDown");
 	}
 
 	@Before
 	public void setUp()
 	{
-		cr = new ConsoleRoulette();
 		System.out.println("@Before - setUp");
+		cr = new ConsoleRoulette();
 	}
 
 	@After
 	public void tearDown()
 	{
-		System.out.println("@After - tearDown");
 	}
 
 	@Test

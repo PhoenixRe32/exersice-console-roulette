@@ -72,4 +72,10 @@ public class Bet
 	{
 		this.gameId = gameId;
 	}
+	
+	@Override
+	public String toString()
+	{
+		return "User Name: " + userName + "\nGame Id: " + gameId + "\nBet Choice: " + choice + "\nBet Amount: " + amount;
+	}
 }
